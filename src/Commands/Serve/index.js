@@ -158,6 +158,22 @@ class Serve extends Command {
     const watchDirs = watch || (dev ? [process.cwd(), '.env'] : [])
 
     /**
+     * Directories to ignore
+     */
+    ignore = ['/tmp/*', '/resources/*', '/public/*'].concat(ignore || []).concat(watch || [])
+
+    // Overwrite ignore directories with watch directories
+    let ignoreDirs = new Set()
+    ignore.forEach(dir => {
+      if (ignoreDirs.has(dir)) {
+        ignoreDirs.delete(dir)
+      } else {
+        ignoreDirs.add(dir)
+      }
+    })
+    ignoreDirs = Array.from(ignoreDirs).map((folder) => `${process.cwd()}/${folder}`)
+
+    /**
      * Custom debug port
      */
     let execJsCommand = 'node'
@@ -177,7 +193,7 @@ class Serve extends Command {
       },
       ext: ext,
       legacyWatch: !!polling,
-      ignore: ['/tmp/*', '/resources/*', '/public/*'].concat(ignore || []).map((folder) => `${process.cwd()}/${folder}`),
+      ignore: ignoreDirs,
       watch: watchDirs,
       stdin: false
     })
